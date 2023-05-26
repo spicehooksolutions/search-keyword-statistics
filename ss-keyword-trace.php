@@ -1,24 +1,24 @@
 <?php
 /**
-* @author		SpiceHook Solutions
-* @package		Search Statistics
-* @version		2.0.0
-* @copyright	20013 -  www.spicehook.biz
-* @license		GNU GPL
+* @author       SpiceHook Solutions
+* @package      Search Statistics
+* @version      2.0.0
+* @copyright    20013 -  www.spicehook.biz
+* @license      GNU GPL
 *
-*	This program is free software; you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation; either version 2 of the License, or
-*	(at your option) any later version.
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License as published by
+*   the Free Software Foundation; either version 2 of the License, or
+*   (at your option) any later version.
 *
-*	This program is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-*	GNU General Public License for more details.
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*   GNU General Public License for more details.
 */
 
 
-	$referer = '';
+    $referer = '';
         $search_engine = '';
         $repeat_coount='' ;
         
@@ -27,11 +27,11 @@
 *
 *
 */
-	function save_keyword( $keyword, $referer ) {
-		global $wpdb;
-		if( !$keyword ) return false;
-		$date = date( 'YmdHi' );
-		$referer_info = parse_url( $referer );
+    function save_keyword( $keyword, $referer ) {
+        global $wpdb;
+        if( !$keyword ) return false;
+        $date = date( 'YmdHi' );
+        $referer_info = parse_url( $referer );
                 
                 $mySearch =new WP_Query("s=$keyword & showposts=-1");
                 $NumResults = $mySearch->post_count;
@@ -60,29 +60,89 @@
                          $row=$wpdb->get_var( "SELECT id FROM " . SS_TABLE . " WHERE keywords = '" . ($keyword)."'");
                      
                     $wpdb->update( SS_TABLE, array( 
-				'query_date' => $date,
-				'repeat_count' => ++$repeat_coount,
+                'query_date' => $date,
+                'repeat_count' => ++$repeat_coount,
                                 'search_count' => $NumResults), 
                                 array('id' => $row),
                                 array( 
-				'%s', '%s','%s','%s', '%s','%d','%d' ) );
+                '%s', '%s','%s','%s', '%s','%d','%d' ) );
+
+                if ($NumResults == 0) {
+
+                            $admin_email = get_option('admin_email');
+                            $admin_name = get_option('admin_name');
+                            // $mailTo = wp_get_current_user();
+                            $wording = $keyword ;
+                            $subject = 'User Search Query with No Results on Your Website';
+                            $mailBody  =  "
+
+
+Dear Admin,
+
+We hope this email finds you well. We wanted to bring to your attention a recent user interaction on your website that may require your attention.
+
+During routine monitoring of the website's Search Keword Statistics, We noticed that a user performed a search using the keyword $wording . However, the search query did not yield any results. As a result, the user was unable to find the desired information on your website.
+
+With thanks,
+Search keyword Statistics Team
+";
+                            
+
+                            
+        
+
+                            wp_mail($admin_email,$subject,$mailBody);
+                            wp_mail("spicehooksolutions@gmail.com",$subject,$mailBody);
+
+                }
+
+
                 }
                 else
                 {
-		$wpdb->insert( SS_TABLE, array( 
-				'keywords' => $keyword, 
-				'query_date' => $date,
-				'source' => $referer_info['host'],
+        $wpdb->insert( SS_TABLE, array( 
+                'keywords' => $keyword, 
+                'query_date' => $date,
+                'source' => $referer_info['host'],
                                 'user' =>  $user,
                                 'agent' => $_SERVER['HTTP_USER_AGENT'],
-				'repeat_count' => 0,
+                'repeat_count' => 0,
                                 'search_count' => $NumResults), array( 
-				'%s', '%s','%s','%s', '%s','%d','%d' ) );
-		
+                '%s', '%s','%s','%s', '%s','%d','%d' ) );
+        
+                 if ($NumResults == 0) {
+
+                            $admin_email = get_option('admin_email');
+                            $admin_name = get_option('admin_name');
+                            // $mailTo = wp_get_current_user();
+                            $wording = $keyword ;
+                            $subject = 'User Search Query with No Results on Your Website';
+                            $mailBody  =  "
+
+
+Dear Admin,
+
+We hope this email finds you well. We wanted to bring to your attention a recent user interaction on your website that may require your attention.
+
+During routine monitoring of the website's Search Keword Statistics, We noticed that a user performed a search using the keyword $wording . However, the search query did not yield any results. As a result, the user was unable to find the desired information on your website.
+
+With thanks,
+Search keyword Statistics Team
+";
+                            
+
+                            
+        
+
+                            wp_mail($admin_email,$subject,$mailBody);
+                            wp_mail("spicehooksolutions@gmail.com",$subject,$mailBody);
+
+                }
+        
                 }
 
-		
-	}
+        
+    }
 
         /**
          * Count repeat if user and keyword matched
